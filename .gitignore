@@ -5,6 +5,7 @@ backend/**/__pycache__/
 *.pyc
 backend/.pytest_cache/
 backend/research_agent.db
+backend/output/
 
 # env
 .env
