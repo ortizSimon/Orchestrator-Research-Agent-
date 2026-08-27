@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -16,6 +17,8 @@ from app import db
 from app.models.schemas import ResearchReport
 from app.report_format import report_to_markdown
 from app.streaming import stream_research
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -41,18 +44,25 @@ async def health() -> dict:
 
 @app.get("/api/research/stream")
 async def research_stream(question: str) -> EventSourceResponse:
+    question = question.strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="question must not be empty")
+
     async def event_generator():
         run_id = uuid.uuid4().hex
         async for event in stream_research(question):
             if event["event"] == "report":
                 report = ResearchReport.model_validate(event["report"])
-                db.save_run(
-                    run_id=run_id,
-                    question=question,
-                    report=report,
-                    created_at=datetime.now(timezone.utc).isoformat(),
-                )
-                event = {**event, "run_id": run_id}
+                try:
+                    db.save_run(
+                        run_id=run_id,
+                        question=question,
+                        report=report,
+                        created_at=datetime.now(timezone.utc).isoformat(),
+                    )
+                    event = {**event, "run_id": run_id}
+                except Exception:
+                    logger.exception("Failed to persist research run %s", run_id)
             yield {"event": event["event"], "data": json.dumps(event)}
 
     return EventSourceResponse(event_generator())
