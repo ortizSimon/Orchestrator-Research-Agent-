@@ -12,24 +12,40 @@ terminal.
 
 ## 2. Agent architecture
 
-Pattern: **orchestrator-as-controller, workers exposed as tools**
-(`agent.as_tool()` in the OpenAI Agents SDK), not handoffs. Handoffs fully
-transfer control to another agent (suited to support/triage flows). Here the
-orchestrator must stay in the loop across stages — e.g. re-searching if
-verification finds a gap — so it calls workers and receives typed results
-back rather than transferring the conversation.
+**Revised during implementation (2026-08-27).** The original plan was an
+LLM orchestrator calling Search/Summarizer/Verifier as tools
+(`agent.as_tool()`). In testing, this produced fabricated citations: the
+orchestrator LLM had to *retype* each tool's structured output as freeform
+text to hand it to the next tool, and it wasn't reliable at reproducing
+URLs verbatim across that relay — it filled in plausible-looking URLs that
+didn't match any real source. That's a correctness failure a "verified,
+cited" tool can't have.
 
-| Agent | Responsibility | Tools |
-|---|---|---|
-| **Orchestrator** | Decomposes the question into sub-queries, calls Search → Summarizer → Verifier per sub-query, decides whether more searching is needed, assembles the final report | Search Agent, Summarizer Agent, Verifier Agent (as tools) |
-| **Search Agent** | Given one sub-query, finds relevant sources | OpenAI hosted `web_search` |
-| **Summarizer Agent** | Given raw results for one sub-topic, extracts key claims, each tagged with its source | — |
-| **Verifier Agent** | Cross-checks claims that recur across multiple summaries, flags contradictions/unsupported claims, scores confidence (source agreement + domain-reputation/recency heuristic) | — |
-| **Report step** | Not a separate agent — the orchestrator's final structured output: exec summary, per-topic sections, confidence/caveats, sources list | — |
+**Current pattern: deterministic Python pipeline, specialized agents
+called directly.** A plain async function (`app/pipeline.py`) calls each
+agent in turn via `Runner.run(...)` and passes the *actual structured
+object* (serialized JSON) from one stage into the next — no LLM ever
+retypes a citation to relay it. LLM judgment is used only where it doesn't
+touch citation fidelity: splitting the question into sub-queries, and
+writing the executive summary from already-verified claims.
+
+| Agent | Responsibility |
+|---|---|
+| **Planner** | Splits the question into 2-5 focused sub-queries |
+| **Search Agent** | Given one sub-query, finds relevant sources (OpenAI hosted `web_search`) |
+| **Summarizer Agent** | Given one sub-query's raw search results (as JSON), extracts key claims, each tagged with its source URL |
+| **Verifier Agent** | Given all sub-topic summaries (as JSON), cross-checks recurring claims, flags contradictions, scores confidence |
+| **Synthesizer** | Given the verified claims (as JSON), writes the 2-4 sentence executive summary |
+| **Report assembly** | Plain Python, not an LLM call — builds `ReportSection`s and the deduplicated source list directly from the typed data |
+
+A confidence band is also enforced in code, not just prompted: a claim with
+fewer than 2 independent supporting sources is capped below 0.8 ("high
+confidence") regardless of what the verifier LLM assigns, since that's a
+cheap, deterministic check that shouldn't depend on prompt-following.
 
 All inter-agent data is typed via **Pydantic models**, not free text, so
 citations and confidence scores survive the pipeline without drifting or
-being re-hallucinated at the final synthesis step.
+being re-hallucinated at any step.
 
 Core schemas:
 
@@ -66,18 +82,17 @@ class ResearchReport(BaseModel):
 ## 3. Communication & streaming
 
 Everything runs in a single Python process — sub-agents are not separate
-services, they're async function calls orchestrated by the Agents SDK
-`Runner`. Parallel sub-queries run via `asyncio.gather`.
+services, they're async function calls (`Runner.run`) chained by
+`app/pipeline.py`. Parallel sub-queries run via `asyncio.gather`.
 
-For the live dashboard, the backend runs the orchestrator in **streaming
-mode** (the Agents SDK emits events: agent started, tool called, tool
-result, message delta). FastAPI forwards these as **Server-Sent Events**
-(SSE) to the Next.js frontend, which renders:
-
-- a live "agent activity feed" (e.g. "Searching: *impact of X on Y*...",
-  "Verifying 4 claims about Z...")
-- report sections filling in incrementally as they complete, rather than
-  waiting for the whole run to finish
+`run_research()` is itself an async generator: it `yield`s a small progress
+event (`tool_started` / `tool_finished`, with a human-readable label and
+the sub-query text) around each stage, and a final `report` event carrying
+the assembled `ResearchReport`. FastAPI forwards these as-is over
+**Server-Sent Events** (SSE) to the Next.js frontend, which renders them as
+a live "agent activity feed" (e.g. "Searching the web: *impact of X on
+Y*...", "Cross-checking claims..."), then swaps in the full structured
+report once the final event arrives.
 
 ## 4. Tech stack
 
@@ -98,14 +113,17 @@ research-agent/
     app/
       main.py                # FastAPI app, SSE endpoint
       agents/
-        orchestrator.py
+        planner_agent.py
         search_agent.py
         summarizer_agent.py
         verifier_agent.py
+        synthesizer_agent.py
       models/
         schemas.py            # Pydantic models above
+      pipeline.py              # deterministic pipeline (async generator)
       db.py                    # SQLite persistence
-      streaming.py             # Agents SDK events -> SSE formatting
+      streaming.py             # serializes pipeline events for SSE
+      report_format.py         # ResearchReport -> Markdown
     tests/
     pyproject.toml
     .env                       # OPENAI_API_KEY

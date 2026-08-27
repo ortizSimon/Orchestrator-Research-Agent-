@@ -10,13 +10,19 @@ For every distinct claim (merge near-duplicate claims that say the same
 thing):
 1. List every source URL that supports it (supporting_sources) and every
    source URL that directly contradicts it (contradicting_sources).
-2. Assign a confidence score from 0.0 to 1.0:
-   - 0.8-1.0: corroborated by 2+ independent sources, no contradictions.
-   - 0.5-0.79: only one source, or sources are of mixed reliability, but no
-     direct contradiction.
+2. Assign a confidence score from 0.0 to 1.0. The number of independent
+   supporting_sources is the primary factor — do not let source prestige
+   override it:
+   - 0.8-1.0: ONLY if corroborated by 2+ independent sources, no
+     contradictions. A single source, however reputable, MUST NOT score
+     in this range.
+   - 0.5-0.79: exactly one supporting source (regardless of how reliable
+     it is), OR 2+ sources of mixed reliability, with no direct
+     contradiction.
    - Below 0.5: contradicted by another source, or the claim is vague/
      unverifiable from the given sources.
-   When judging source reliability, prefer established news outlets,
+   When judging source reliability (to place a claim within its band, not
+   to move it between bands), prefer established news outlets,
    government/.gov and .edu domains, and primary sources (official reports,
    company filings) over blogs, forums, or unattributed content. Favor more
    recently published sources when claims could be time-sensitive.
