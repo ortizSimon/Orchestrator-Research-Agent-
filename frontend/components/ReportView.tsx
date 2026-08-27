@@ -5,6 +5,7 @@ import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { SourceCard } from "@/components/SourceCard";
 import { ResearchReportT } from "@/lib/types";
 import { API_BASE } from "@/lib/api";
+import { hostnameOf, safeHttpUrl } from "@/lib/url";
 
 async function downloadMarkdown(runId: string) {
   const res = await fetch(`${API_BASE}/api/research/${runId}/markdown`);
@@ -68,17 +69,26 @@ export function ReportView({
                 <p className="text-[0.95rem] leading-relaxed text-foreground/90">{claim.text}</p>
                 <div className="mt-2.5 flex flex-wrap items-center gap-2">
                   <ConfidenceBadge confidence={claim.confidence} />
-                  {claim.supporting_sources.map((url) => (
-                    <a
-                      key={url}
-                      href={url}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="max-w-40 truncate rounded-full border border-border px-2.5 py-1 font-mono text-[0.7rem] text-muted-foreground/80 transition-colors hover:border-primary/40 hover:text-foreground"
-                    >
-                      {new URL(url).hostname.replace(/^www\./, "")}
-                    </a>
-                  ))}
+                  {claim.supporting_sources.map((source) => {
+                    const url = safeHttpUrl(source);
+                    const className =
+                      "max-w-40 truncate rounded-full border border-border px-2.5 py-1 font-mono text-[0.7rem] text-muted-foreground/80 transition-colors hover:border-primary/40 hover:text-foreground";
+                    return url ? (
+                      <a
+                        key={source}
+                        href={url.href}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className={className}
+                      >
+                        {hostnameOf(source)}
+                      </a>
+                    ) : (
+                      <span key={source} className={className}>
+                        {source}
+                      </span>
+                    );
+                  })}
                 </div>
                 {claim.note && (
                   <p className="mt-2 text-xs italic text-muted-foreground/60">{claim.note}</p>
