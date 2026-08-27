@@ -8,8 +8,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,72 +50,52 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  color-scheme: dark;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0a0a0d;
+  --foreground: #f3f1ec;
+  --card: #111218;
+  --card-foreground: #f3f1ec;
+  --popover: #121319;
+  --popover-foreground: #f3f1ec;
+  --primary: #f2b653;
+  --primary-foreground: #1a1408;
+  --secondary: #1a1b21;
+  --secondary-foreground: #f3f1ec;
+  --muted: #16171d;
+  --muted-foreground: rgba(243, 241, 236, 0.56);
+  --accent: #1a1b21;
+  --accent-foreground: #f3f1ec;
+  --destructive: #fb7185;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #f2b653;
+  --chart-1: #6c8bff;
+  --chart-2: #c084fc;
+  --chart-3: #f2b653;
+  --chart-4: #3ddc97;
+  --chart-5: #fb7185;
+  --radius: 0.85rem;
+  --sidebar: #0c0d11;
+  --sidebar-foreground: #f3f1ec;
+  --sidebar-primary: #f2b653;
+  --sidebar-primary-foreground: #1a1408;
+  --sidebar-accent: #16171d;
+  --sidebar-accent-foreground: #f3f1ec;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #f2b653;
+
+  /* Signature "Core" palette -- each specialized agent gets a color that
+     appears in the orb, the activity feed, and nowhere else decorative,
+     so the system stays legible as a map of the architecture. */
+  --agent-search: #6c8bff;
+  --agent-summarize: #c084fc;
+  --agent-verify: #f2b653;
+  --agent-synthesize: #3ddc97;
+
+  --confidence-high: #3ddc97;
+  --confidence-medium: #f2b653;
+  --confidence-low: #fb7185;
 }
 
 @layer base {
@@ -127,4 +108,93 @@
   html {
     @apply font-sans;
   }
+}
+
+@layer base {
+  body {
+    position: relative;
+    background:
+      radial-gradient(ellipse 900px 600px at 12% -10%, rgba(108, 139, 255, 0.10), transparent 60%),
+      radial-gradient(ellipse 800px 700px at 110% 10%, rgba(242, 182, 83, 0.08), transparent 55%),
+      radial-gradient(ellipse 1000px 800px at 50% 120%, rgba(192, 132, 252, 0.06), transparent 60%),
+      var(--background);
+    background-attachment: fixed;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .agent-dot {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dot-color) 18%, transparent);
+  }
+}
+
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+@keyframes orb-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orb-spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes feed-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.82); }
+}
+
+.animate-rise-in {
+  animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-feed-in {
+  animation: feed-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

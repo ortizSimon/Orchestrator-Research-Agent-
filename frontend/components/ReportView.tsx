@@ -1,9 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { SourceCard } from "@/components/SourceCard";
 import { ResearchReportT } from "@/lib/types";
@@ -21,6 +18,14 @@ async function downloadMarkdown(runId: string) {
   URL.revokeObjectURL(url);
 }
 
+function confidenceColor(confidence: number): string {
+  return confidence >= 0.8
+    ? "var(--confidence-high)"
+    : confidence >= 0.5
+      ? "var(--confidence-medium)"
+      : "var(--confidence-low)";
+}
+
 export function ReportView({
   report,
   runId,
@@ -29,64 +34,71 @@ export function ReportView({
   runId: string | null;
 }) {
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div>
-            <CardTitle className="text-xl">{report.question}</CardTitle>
-          </div>
-          {runId && (
-            <Button variant="outline" size="sm" onClick={() => downloadMarkdown(runId)}>
-              Download .md
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {report.executive_summary}
+    <div className="space-y-10">
+      <div className="rounded-2xl border border-border bg-card/50 p-6">
+        <div className="flex items-start justify-between gap-4">
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground/60">
+            Executive summary
           </p>
-        </CardContent>
-      </Card>
+          {runId && (
+            <button
+              onClick={() => downloadMarkdown(runId)}
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 font-mono text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+            >
+              <Download className="h-3 w-3" />
+              .md
+            </button>
+          )}
+        </div>
+        <p className="mt-3 text-[1.05rem] leading-relaxed text-foreground/90">
+          {report.executive_summary}
+        </p>
+      </div>
 
       {report.sections.map((section, i) => (
-        <Card key={i}>
-          <CardHeader>
-            <CardTitle className="text-base">{section.heading}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div key={i}>
+          <h2 className="font-display text-xl italic text-foreground">{section.heading}</h2>
+          <div className="mt-4 flex flex-col gap-4">
             {section.claims.map((claim, j) => (
-              <div key={j} className="space-y-1.5">
-                <p className="text-sm">{claim.text}</p>
-                <div className="flex flex-wrap items-center gap-2">
+              <div
+                key={j}
+                className="rounded-xl border-l-2 bg-card/30 py-3 pl-4 pr-4"
+                style={{ borderColor: confidenceColor(claim.confidence) }}
+              >
+                <p className="text-[0.95rem] leading-relaxed text-foreground/90">{claim.text}</p>
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
                   <ConfidenceBadge confidence={claim.confidence} />
                   {claim.supporting_sources.map((url) => (
-                    <Badge key={url} variant="secondary" className="max-w-48 truncate">
-                      <a href={url} target="_blank" rel="noreferrer noopener">
-                        {new URL(url).hostname}
-                      </a>
-                    </Badge>
+                    <a
+                      key={url}
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="max-w-40 truncate rounded-full border border-border px-2.5 py-1 font-mono text-[0.7rem] text-muted-foreground/80 transition-colors hover:border-primary/40 hover:text-foreground"
+                    >
+                      {new URL(url).hostname.replace(/^www\./, "")}
+                    </a>
                   ))}
                 </div>
                 {claim.note && (
-                  <p className="text-xs italic text-muted-foreground">{claim.note}</p>
+                  <p className="mt-2 text-xs italic text-muted-foreground/60">{claim.note}</p>
                 )}
-                {j < section.claims.length - 1 && <Separator className="mt-3" />}
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Sources ({report.sources.length})</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-2 sm:grid-cols-2">
+      <div>
+        <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground/60">
+          Sources &middot; {report.sources.length}
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {report.sources.map((source, i) => (
             <SourceCard key={i} source={source} />
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

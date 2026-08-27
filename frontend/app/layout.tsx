@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Space_Grotesk, Geist_Mono } from "next/font/google";
+import { Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-display",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -22,20 +28,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${fraunces.variable} ${spaceGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <header className="border-b">
-          <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-            <Link href="/" className="font-semibold">
-              Research Agent
-            </Link>
-            <Link href="/history" className="text-sm text-muted-foreground hover:text-foreground">
-              History
-            </Link>
-          </div>
-        </header>
-        <main className="flex-1">{children}</main>
+      <body className="flex h-full min-h-screen" suppressHydrationWarning>
+        <Sidebar />
+        <main className="relative min-h-screen flex-1 overflow-y-auto">{children}</main>
       </body>
     </html>
   );
